@@ -2,6 +2,19 @@ use crate::{errors::Error, response::GeocodeBatchResponse, GeocodioProxy};
 
 const GEOCODIO_BASE_URL: &str = "https://api.geocod.io/v1.7/";
 
+#[macro_export]
+macro_rules! geo_fetch {
+    ($data:ident, $endpoint:ident, $params:ident, $res:ty) => {{
+        let response = $data.request($endpoint, &$params).await?;
+        let json = response.json::<serde_json::Value>().await.unwrap();
+        let result = serde_json::from_value::<$res>(json);
+        match result {
+            Ok(geocode_response) => Ok(geocode_response),
+            Err(e) => Err(Error::BadAddress(e)),
+        }
+    }};
+}
+
 pub(crate) fn proxy_new(api_key: String) -> Result<GeocodioProxy, Error> {
     let client = reqwest::Client::new();
 

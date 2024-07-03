@@ -5,9 +5,9 @@ use response::{GeocodeBatchResponse, GeocodeResponse, GeocodeReverseResponse};
 
 pub mod json;
 pub mod errors;
-pub mod utils;
 pub mod request;
 pub mod response;
+pub(crate) mod utils;
 
 pub struct GeocodioProxy {
     pub client: reqwest::Client,
@@ -37,13 +37,8 @@ impl GeocodioProxy {
         if let Some(fields) = fields {
             params.push_str(format!("&fields={}", fields.join(",")).as_str());
         }
-        let response = self.request("geocode", &params).await?;
-        let json = response.json::<serde_json::Value>().await.unwrap();
-        let result = serde_json::from_value::<GeocodeResponse>(json);
-        match result {
-            Ok(geocode_response) => Ok(geocode_response),
-            Err(e) => Err(Error::BadAddress(e)),
-        }
+        let endpoint = "geocode";
+        geo_fetch!(self, endpoint, params, GeocodeResponse)
     }
 
     /// Batch Geocode
@@ -62,13 +57,8 @@ impl GeocodioProxy {
     /// Reverse geocode a tuple of (lat,lng)
     pub async fn reverse_geocode(&self, coordinates: Coordinates) -> Result<GeocodeReverseResponse, Error> {
         let params = format!("q={},{}", coordinates.latitude, coordinates.longitude);
-        let response = self.request("reverse", &params).await?;
-        let json = response.json::<serde_json::Value>().await.unwrap();
-        let result = serde_json::from_value::<GeocodeReverseResponse>(json);
-        match result {
-            Ok(geocode_response) => Ok(geocode_response),
-            Err(e) => Err(Error::BadAddress(e)),
-        }
+        let endpoint = "reverse";
+        geo_fetch!(self, endpoint, params, GeocodeReverseResponse)
     }
 
     // TODO: reverse geocode batch
