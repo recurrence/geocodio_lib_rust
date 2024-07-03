@@ -10,7 +10,7 @@ macro_rules! geo_fetch {
         let result = serde_json::from_value::<$res>(json);
         match result {
             Ok(geocode_response) => Ok(geocode_response),
-            Err(e) => Err(Error::BadAddress(e)),
+            Err(err) => Err(Error::BadInputData(err)),
         }
     }};
 }
@@ -31,6 +31,6 @@ pub(crate) async fn batch_fetch(data: &GeocodioProxy, endpoint: String, params: 
     let result = serde_json::from_value::<GeocodeBatchResponse>(json);
     match result {
         Ok(geocode_response) => Ok(geocode_response),
-        Err(e) => Err(Error::BadAddress(e)),
+        Err(err) => Err(Error::BadInputData(err)),
     }
 }

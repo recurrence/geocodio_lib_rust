@@ -10,7 +10,7 @@ pub enum Error {
     Request(#[from] reqwest::Error),
 
     #[error(transparent)]
-    BadAddress(#[from] serde_json::Error),
+    BadInputData(#[from] serde_json::Error),
 
     #[error("Failed to fetch {0} from Geocodio API")]
     Api(String),
