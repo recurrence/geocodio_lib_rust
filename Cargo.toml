@@ -2,11 +2,18 @@
 name = "geocodio_lib_rust"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "A client library to interface with the Geocodio API."
+readme = "README.md"
+repository = "https://github.com/Cosiamo/geocodio_lib_rust"
+keywords = ["api", "geocode", "geocoding", "geocodio", "locations"]
+categories = ["api-bindings", "encoding", "template-engine", "web-programming"]
+exclude = ["main.rs", ".vscode/*", ".gitignore", ".env"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-reqwest = { version = "0.11.10", features = ["json"] }
+reqwest = { version = "0.12.5", features = ["json"] }
 dotenv = "0.15.0"
 serde = { version = "1.0.136", features = ["derive"] }
 serde_json = "1.0.79"
