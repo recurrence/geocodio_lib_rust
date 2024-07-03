@@ -4,7 +4,7 @@ pub mod fetch;
 
 impl GeocodioProxy {
     /// Helper function to wrap the request
-    pub async fn request(&self, endpoint: &str, params: &str) -> Result<reqwest::Response, Error> {
+    pub(crate) async fn request(&self, endpoint: &str, params: &str) -> Result<reqwest::Response, Error> {
         let mut url = self.base_url.join(endpoint).unwrap();
         url.set_query(Some(params));
         url.query_pairs_mut().append_pair("api_key", &self.api_key);
@@ -13,7 +13,7 @@ impl GeocodioProxy {
     }
 
     /// Request Batch
-    pub async fn request_batch(&self, endpoint: &str, params: Vec<String>) -> Result<reqwest::Response, Error> {
+    pub(crate) async fn request_batch(&self, endpoint: &str, params: Vec<String>) -> Result<reqwest::Response, Error> {
         let url = self.base_url.join(endpoint).unwrap();
         let mut payload: Vec<String> = Vec::new();
 
