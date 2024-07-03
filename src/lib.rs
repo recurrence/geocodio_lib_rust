@@ -1,6 +1,6 @@
 use errors::Error;
 use json::{address::AddressParams, utils::Coordinates};
-use request::fetch::proxy_new;
+use request::fetch::{batch_fetch, proxy_new};
 use response::{GeocodeBatchResponse, GeocodeResponse, GeocodeReverseResponse};
 
 pub mod json;
@@ -56,13 +56,7 @@ impl GeocodioProxy {
             };
         });
         let endpoint = format!("geocode?api_key={}", &self.api_key);
-        let res = self.request_batch(endpoint.as_str(), params).await?;
-        let json = res.json::<serde_json::Value>().await?;
-        let result = serde_json::from_value::<GeocodeBatchResponse>(json);
-        match result {
-            Ok(geocode_response) => Ok(geocode_response),
-            Err(e) => Err(Error::BadAddress(e)),
-        }
+        batch_fetch(self, endpoint, params).await
     }
 
     /// Reverse geocode a tuple of (lat,lng)
@@ -79,18 +73,10 @@ impl GeocodioProxy {
 
     // TODO: reverse geocode batch
     pub async fn reverse_geocode_batch(&self, coordinates: Vec<Coordinates>) -> Result<GeocodeBatchResponse, Error> {
-        let params = coordinates
-            .iter()
-            .map(|coords| {
+        let params = coordinates.iter().map(|coords| {
                 format!("{},{}", coords.latitude, coords.longitude)
             }).collect::<Vec<String>>();
         let endpoint = format!("reverse?api_key={}", &self.api_key);
-        let res = self.request_batch(endpoint.as_str(), params).await?;
-        let json = res.json::<serde_json::Value>().await?;
-        let result = serde_json::from_value::<GeocodeBatchResponse>(json);
-        match result {
-            Ok(geocode_response) => Ok(geocode_response),
-            Err(e) => Err(Error::BadAddress(e)),
-        }
+        batch_fetch(self, endpoint, params).await
     }
 }
