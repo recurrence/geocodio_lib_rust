@@ -1,6 +1,8 @@
 use crate::{errors::Error, GeocodioProxy};
 
 pub mod fetch;
+pub mod address;
+pub mod utils;
 
 impl GeocodioProxy {
     /// Helper function to wrap the request

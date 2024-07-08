@@ -1,4 +1,4 @@
-use crate::json::address::AddressInput;
+use super::address::AddressInput;
 
 impl AddressInput {
     pub fn fmt_string(&self) -> String {

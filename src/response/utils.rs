@@ -19,14 +19,6 @@ pub struct Fields {
 pub type CensusResults = serde_json::Value;
 pub type CencusAcs = serde_json::Value;
 
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Coordinates {
-    #[serde(rename = "lat")]
-    pub latitude: f64,
-    #[serde(rename = "lng")]
-    pub longitude: f64,
-}
-
 #[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct SchoolDistricts {
     pub unified: Option<SchoolDistrict>,

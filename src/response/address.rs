@@ -1,20 +1,19 @@
 use serde::{Deserialize, Serialize};
 
-use super::utils::{Coordinates, Fields};
+use crate::request::address::Coordinates;
 
-#[derive(Serialize, Deserialize)]
-pub struct AddressInput {
-    pub line_1: Option<String>,
-    pub line_2: Option<String>,
-    pub city: Option<String>,
-    pub state: Option<String>,
-    pub country: Option<String>,
-    pub postal_code: Option<String>,
-}
+use super::utils::Fields;
 
-pub enum AddressParams {
-    String(String),
-    AddressInput(AddressInput),
+#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Address {
+    pub query: Option<String>,
+    pub address_components: AddressComponents,
+    pub formatted_address: String,
+    pub location: Coordinates,
+    pub accuracy: f64,
+    pub accuracy_type: String,
+    pub source: String,
+    pub fields: Option<Fields>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -37,16 +36,4 @@ pub struct AddressComponents {
     #[serde(rename = "predirectional")]
     pub pre_directional: Option<String>,
     pub prefix: Option<String>,
-}
-
-#[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Address {
-    pub query: Option<String>,
-    pub address_components: AddressComponents,
-    pub formatted_address: String,
-    pub location: Coordinates,
-    pub accuracy: f64,
-    pub accuracy_type: String,
-    pub source: String,
-    pub fields: Option<Fields>,
 }

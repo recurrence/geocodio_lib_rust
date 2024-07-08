@@ -1,18 +1,15 @@
 #![doc = include_str!("../README.md")]
 
 use errors::Error;
-use json::{address::AddressParams, utils::Coordinates};
-use request::fetch::{batch_fetch, proxy_new};
 use response::{GeocodeBatchResponse, GeocodeResponse, GeocodeReverseResponse};
+use request::{address::{AddressParams, Coordinates}, fetch::{batch_fetch, proxy_new}};
 
-/// Contains structs that are formatted to be used as json in GET requests
-pub mod json;
-/// Errors that can occur in the Crate
-pub mod errors;
 /// Response structs formatted from the json in the API docs
 pub mod response;
-pub(crate) mod request;
-pub(crate) mod utils;
+/// Errors that can occur in the Crate
+pub mod errors;
+/// Request structs and functions 
+pub mod request;
 
 /// A struct used to interface with the [Geocodio API](https://www.geocod.io/docs/#introduction).
 /// 
@@ -57,7 +54,7 @@ impl GeocodioProxy {
     /// # Example
     /// 
     /// ```rust
-    /// use geocodio_lib_rust::{json::address::{AddressInput, AddressParams}, GeocodioProxy};
+    /// use geocodio_lib_rust::{request::address::{AddressInput, AddressParams}, GeocodioProxy};
     ///
     /// #[tokio::main]
     /// async fn main() {
@@ -100,7 +97,7 @@ impl GeocodioProxy {
     /// # Example
     /// 
     /// ```rust
-    /// use geocodio_lib_rust::{json::address::AddressParams, GeocodioProxy};
+    /// use geocodio_lib_rust::{request::address::AddressParams, GeocodioProxy};
     ///
     /// #[tokio::main]
     /// async fn main() {
@@ -156,7 +153,7 @@ impl GeocodioProxy {
     /// # Example
     /// 
     /// ```rust
-    /// use geocodio_lib_rust::{json::utils::Coordinates, GeocodioProxy};
+    /// use geocodio_lib_rust::{request::address::Coordinates, GeocodioProxy};
     /// 
     /// #[tokio::main]
     /// async fn main() {
@@ -182,7 +179,7 @@ impl GeocodioProxy {
     /// # Example
     /// 
     /// ```rust
-    /// use geocodio_lib_rust::{json::utils::Coordinates, GeocodioProxy};
+    /// use geocodio_lib_rust::{request::address::Coordinates, GeocodioProxy};
     ///
     /// #[tokio::main]
     /// async fn main() {
