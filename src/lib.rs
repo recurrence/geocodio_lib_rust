@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 use errors::Error;
 use json::{address::AddressParams, utils::Coordinates};
 use request::fetch::{batch_fetch, proxy_new};
@@ -9,26 +11,73 @@ pub mod request;
 pub mod response;
 pub(crate) mod utils;
 
+
+/// A struct used to interface with the [Geocodio API](https://www.geocod.io/docs/#introduction).
+/// 
+/// To get started, create a new instance with [`GeocodioProxy::new()`] or [`GeocodioProxy::new_from_key()`].
+/// ```rust
+/// let geocodio = GeocodioProxy::new().unwrap();
+/// // or
+/// let geocodio = GeocodioProxy::new_from_key(my_api_key).unwrap();
+/// ```
+/// 
+/// Once you instantiate the struct, you can either 
+/// geocode or reverse geocode a single address or 
+/// a batch of addresses [(up to 10,000 lookups)](https://www.geocod.io/docs/#batch-geocoding).
 pub struct GeocodioProxy {
     pub client: reqwest::Client,
     pub base_url: reqwest::Url,
     pub api_key: String,
 }
 
+// ========== instantiate GeocodeProxy ==========
 impl GeocodioProxy {
-    /// Instantiate new GeocodioProxy API client from .env GEOCODIO_API_KEY variable
+    /// Create a new instance of [`GeocodioProxy`] via the variable GEOCODIO_API_KEY you define in a .env file.
     pub fn new() -> Result<Self, Error> {
         dotenv::dotenv().ok();
         let api_key = std::env::var("GEOCODIO_API_KEY")?;
         proxy_new(api_key)
     }
 
-    /// Instantiate new GeocodioProxy API client by passing api key
+    /// Create a new instance of [`GeocodioProxy`] via a variable you pass into the method.
     pub fn new_from_key(api_key: String) -> Result<Self, Error> {
         proxy_new(api_key)
     }
+}
 
-    /// Geocode a single address
+// ========== geocode address(es) ==========
+impl GeocodioProxy {
+    /// Geocode a single address.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use geocodio_lib_rust::{json::address::{AddressInput, AddressParams}, GeocodioProxy};
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///    let geocodio = GeocodioProxy::new().unwrap();
+    ///    let response = geocodio
+    ///        .geocode(
+    ///            AddressParams::AddressInput(AddressInput {
+    ///                 line_1: Some("1500 Sugar Bowl Dr".to_string()),
+    ///                 line_2: None,
+    ///                 city: Some("New Orleans".to_string()),
+    ///                 state: Some("LA".to_string()),
+    ///                 country: Some("US".to_string()),
+    ///                 postal_code: Some("70112".to_string()),
+    ///            }),
+    ///            None,
+    ///        )
+    ///        .await
+    ///        .unwrap();
+    ///    println!(
+    ///        "The coordinates for the Superdome are: {}, {}", 
+    ///        response.results[0].location.latitude, 
+    ///        response.results[0].location.longitude
+    ///    )
+    ///}
+    /// ```
     pub async fn geocode(&self, address: AddressParams, fields: Option<&[&str]>) -> Result<GeocodeResponse, Error> {
         let mut params = match address {
             AddressParams::String(address) => address.to_string(),
@@ -38,10 +87,50 @@ impl GeocodioProxy {
             params.push_str(format!("&fields={}", fields.join(",")).as_str());
         }
         let endpoint = "geocode";
-        geo_fetch!(self, endpoint, params, GeocodeResponse)
+        single_fetch!(self, endpoint, params, GeocodeResponse)
     }
 
-    /// Batch Geocode
+    /// Batch Geocode up to [10,000 addresses](https://www.geocod.io/docs/#batch-geocoding).
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use geocodio_lib_rust::{json::address::AddressParams, GeocodioProxy};
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///    let addresses = vec![
+    ///        AddressParams::String("1500 Sugar Bowl Dr, New Orleans, LA 70112".to_string()),
+    ///        AddressParams::String("1 MetLife Stadium Dr, East Rutherford, NJ 07073".to_string()),
+    ///        AddressParams::String("1 AT&T Way, Arlington, TX 76011".to_string())
+    ///    ];
+    ///
+    ///    let geocodio = GeocodioProxy::new().unwrap();
+    ///    let response = geocodio
+    ///        .geocode_batch(addresses)
+    ///        .await
+    ///        .unwrap();
+    ///
+    ///    response.results.map(|res| {
+    ///        res.iter().map(|address| {
+    ///            if let Some(input) = &address.query {
+    ///                println!("INPUT ADDRESS: {:?}", input);
+    ///            };
+    ///            if let Some(response) = &address.response {
+    ///                if let Some(results) = &response.results {
+    ///                    println!("ADDRESS COMPONENTS: {:?}", results[0].address_components);
+    ///                    println!("FORMATTED ADDRESS: {:?}", results[0].formatted_address);
+    ///                    println!("LOCATION: {:?}", results[0].location);
+    ///                    println!("ACCURACY: {:?}", results[0].accuracy);
+    ///                    println!("ACCURACY TYPE: {:?}", results[0].accuracy_type);
+    ///                    println!("SOURCE: {:?}", results[0].source);
+    ///                }
+    ///            };
+    ///            println!("============================")
+    ///        }).collect::<Vec<_>>()
+    ///    });
+    ///}
+    /// ```
     pub async fn geocode_batch(&self, addresses: Vec<AddressParams>) -> Result<GeocodeBatchResponse, Error> {
         let mut params: Vec<String> = Vec::new();
         addresses.iter().for_each(|address| {
@@ -53,15 +142,60 @@ impl GeocodioProxy {
         let endpoint = format!("geocode?api_key={}", &self.api_key);
         batch_fetch(self, endpoint, params).await
     }
+}
 
-    /// Reverse geocode a tuple of (lat,lng)
+// ========== reverse geocode ==========
+impl GeocodioProxy {
+    /// Reverse geocode [`Coordinates`] to get the address and other location information.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use geocodio_lib_rust::{json::utils::Coordinates, GeocodioProxy};
+    /// 
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let geocodio = GeocodioProxy::new().unwrap();
+    ///     let coordinates = Coordinates { latitude: 40.81352, longitude: -74.074333 };
+    /// 
+    ///     let response = geocodio
+    ///         .reverse_geocode(coordinates)
+    ///         .await
+    ///         .unwrap();
+    ///     println!("{:?}", response);
+    /// }
+    /// ```
+    /// 
     pub async fn reverse_geocode(&self, coordinates: Coordinates) -> Result<GeocodeReverseResponse, Error> {
         let params = format!("q={},{}", coordinates.latitude, coordinates.longitude);
         let endpoint = "reverse";
-        geo_fetch!(self, endpoint, params, GeocodeReverseResponse)
+        single_fetch!(self, endpoint, params, GeocodeReverseResponse)
     }
 
-    // TODO: reverse geocode batch
+    /// Reverse geocode a vector of [`Coordinates`] to get the addresses and other location information.
+    /// 
+    /// # Example
+    /// 
+    /// ```rust
+    /// use geocodio_lib_rust::{json::utils::Coordinates, GeocodioProxy};
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let geocodio = GeocodioProxy::new().unwrap();
+    /// 
+    ///     let coordinates = vec![
+    ///         Coordinates { latitude: 40.81352, longitude: -74.074333 },
+    ///         Coordinates { latitude: 35.9746000, longitude: -77.9658000 },
+    ///         Coordinates { latitude: 32.8793700, longitude: -96.6303900 },
+    ///     ];
+    /// 
+    ///     let response = geocodio
+    ///         .reverse_geocode_batch(coordinates)
+    ///         .await
+    ///         .unwrap();
+    ///     println!("{:?}", response);
+    /// }
+    /// ```
     pub async fn reverse_geocode_batch(&self, coordinates: Vec<Coordinates>) -> Result<GeocodeBatchResponse, Error> {
         let params = coordinates.iter().map(|coords| {
                 format!("{},{}", coords.latitude, coords.longitude)
