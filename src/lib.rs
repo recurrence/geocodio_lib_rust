@@ -5,16 +5,21 @@ use json::{address::AddressParams, utils::Coordinates};
 use request::fetch::{batch_fetch, proxy_new};
 use response::{GeocodeBatchResponse, GeocodeResponse, GeocodeReverseResponse};
 
+/// Contains structs that are formatted to be used as json in GET requests
 pub mod json;
+/// Errors that can occur in the Crate
 pub mod errors;
-pub mod request;
+/// Response structs formatted from the json in the API docs
 pub mod response;
+pub(crate) mod request;
 pub(crate) mod utils;
-
 
 /// A struct used to interface with the [Geocodio API](https://www.geocod.io/docs/#introduction).
 /// 
-/// To get started, create a new instance with [`GeocodioProxy::new()`] or [`GeocodioProxy::new_from_key()`].
+/// The client and URL are already provided, all that's needed from you is your Geocodio
+/// API key. There's an option if you have it in a .env file with the name 'GEOCODIO_API_KEY' 
+/// ([`GeocodioProxy::new`]), or if you're using another method to obtain your key and 
+/// assigning it to a variable ([`GeocodioProxy::new_from_key()`]).
 /// ```rust
 /// let geocodio = GeocodioProxy::new().unwrap();
 /// // or
@@ -32,7 +37,7 @@ pub struct GeocodioProxy {
 
 // ========== instantiate GeocodeProxy ==========
 impl GeocodioProxy {
-    /// Create a new instance of [`GeocodioProxy`] via the variable GEOCODIO_API_KEY you define in a .env file.
+    /// Create a new instance of [`GeocodioProxy`] via the variable 'GEOCODIO_API_KEY' you define in a .env file.
     pub fn new() -> Result<Self, Error> {
         dotenv::dotenv().ok();
         let api_key = std::env::var("GEOCODIO_API_KEY")?;
