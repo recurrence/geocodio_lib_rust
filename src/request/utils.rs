@@ -1,7 +1,7 @@
 use super::address::AddressInput;
 
 impl AddressInput {
-    pub fn fmt_string(&self) -> String {
+    pub(crate) fn fmt_string(&self) -> String {
         let binding = "".to_string();
         let line_1 = match &self.line_1 {
             Some(val) => val,
@@ -29,7 +29,7 @@ impl AddressInput {
         )
     }
     
-    pub fn to_string(&self) -> String {
+    pub(crate) fn to_string(&self) -> String {
         let binding = "".to_string();
         let line_1 = match &self.line_1 {
             Some(val) => val,
