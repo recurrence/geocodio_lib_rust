@@ -67,7 +67,7 @@ async fn main() {
 ## Batch Geocode
 
 ```rust
-use geocodio_lib_rust::{request::address::{AddressInput, AddressParams}, GeocodioProxy};
+use geocodio_lib_rust::{request::address::AddressParams, response::BatchResult, GeocodioProxy};
 
 #[tokio::main]
 async fn main() {
@@ -83,8 +83,8 @@ async fn main() {
         .await
         .unwrap();
 
-    response.results.map(|res| {
-        res.iter().map(|address| {
+    response.results.map(|res: Vec<BatchResult>| {
+        res.iter().map(|address: &BatchResult| {
             if let Some(input) = &address.query {
                 println!("INPUT ADDRESS: {:?}", input);
             };

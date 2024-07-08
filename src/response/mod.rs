@@ -2,8 +2,11 @@ use serde::{Deserialize, Serialize};
 
 use crate::response::{address::{Address, AddressComponents}, utils::{Input, Location}};
 
+/// Address information formatted to match the json response
 pub mod address;
+/// Congressional district information
 pub mod congressional;
+/// Extra response information
 pub mod utils;
 
 /// The result type for [`GeocodioProxy::geocode`]. 
@@ -11,27 +14,25 @@ pub mod utils;
 /// Contains a parsed input and a vector of addresses. The reason there are multiple
 /// addresses in 'results' is because if the input address isn't properly formatted
 /// or is missing some piece of the address, the API will send multiple addresses that 
-/// could be the match with an accuracy score attached.
+/// could be the match, with an accuracy score attached.
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GeocodeResponse {
     pub input: Input,
     pub results: Vec<Address>,
-    pub debug: Option<Debug>,
 }
 
-// Batch Response
+/// The result type for [`GeocodioProxy::geocode_batch`] and [`GeocodioProxy::reverse_geocode_batch`].
 #[derive(Default, Debug, PartialEq, Serialize, Deserialize)]
 pub struct GeocodeBatchResponse {
     pub results: Option<Vec<BatchResult>>,
-    pub debug: Option<Debug>,
 }
 
 #[derive(Default, Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GeocodeReverseResponse {
     pub results: Option<Vec<Address>>,
-    pub debug: Option<Debug>,
 }
 
+/// Individual results from each [`GeocodeBatchResponse`].
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 pub struct BatchResult {
     pub query: Option<String>,
@@ -53,6 +54,3 @@ pub struct ResponseResult {
     pub accuracy_type: Option<String>,
     pub source: Option<String>,
 }
-
-#[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct Debug {}

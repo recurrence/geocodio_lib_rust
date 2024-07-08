@@ -23,9 +23,9 @@ pub mod request;
 /// let geocodio = GeocodioProxy::new_from_key(my_api_key).unwrap();
 /// ```
 /// 
-/// Once you instantiate the struct, you can either 
-/// geocode or reverse geocode a single address or 
-/// a batch of addresses [(up to 10,000 lookups)](https://www.geocod.io/docs/#batch-geocoding).
+/// Once you instantiate the struct, you can either geocode or reverse geocode 
+/// a single address or a batch of addresses 
+/// [(up to 10,000 lookups)](https://www.geocod.io/docs/#batch-geocoding).
 pub struct GeocodioProxy {
     pub client: reqwest::Client,
     pub base_url: reqwest::Url,
@@ -34,7 +34,7 @@ pub struct GeocodioProxy {
 
 // ========== instantiate GeocodeProxy ==========
 impl GeocodioProxy {
-    /// Create a new instance of [`GeocodioProxy`] via the variable 'GEOCODIO_API_KEY' you define in a .env file.
+    /// Create a new instance of [`GeocodioProxy`] via a variable named `GEOCODIO_API_KEY` you define in a `.env` file.
     pub fn new() -> Result<Self, Error> {
         dotenv::dotenv().ok();
         let api_key = std::env::var("GEOCODIO_API_KEY")?;
@@ -97,7 +97,7 @@ impl GeocodioProxy {
     /// # Example
     /// 
     /// ```rust
-    /// use geocodio_lib_rust::{request::address::AddressParams, GeocodioProxy};
+    /// use geocodio_lib_rust::{request::address::AddressParams, response::BatchResult, GeocodioProxy};
     ///
     /// #[tokio::main]
     /// async fn main() {
@@ -113,8 +113,8 @@ impl GeocodioProxy {
     ///        .await
     ///        .unwrap();
     ///
-    ///    response.results.map(|res| {
-    ///        res.iter().map(|address| {
+    ///    response.results.map(|res: Vec<BatchResult>| {
+    ///        res.iter().map(|address: &BatchResult| {
     ///            if let Some(input) = &address.query {
     ///                println!("INPUT ADDRESS: {:?}", input);
     ///            };
