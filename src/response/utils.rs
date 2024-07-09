@@ -77,8 +77,8 @@ pub struct FacilityCode {
 
 #[derive(Default, Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Input {
-    address_components: AddressComponents,
-    formatted_address: String,
+    pub address_components: AddressComponents,
+    pub formatted_address: String,
 }
 
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
